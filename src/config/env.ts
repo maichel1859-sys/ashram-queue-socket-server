@@ -1,6 +1,3 @@
-import dotenv from 'dotenv';
-dotenv.config();
-
 /**
  * Environment configuration for Socket.IO server
  * Simplified configuration for single port operation
@@ -8,25 +5,25 @@ dotenv.config();
 
 export const config = {
   // Server configuration
-  port: process.env['PORT'] || 7077,
-  host: process.env['HOST'] || '0.0.0.0',
-  nodeEnv: process.env['NODE_ENV'] || 'development',
+  port: 7077,
+  host: '0.0.0.0',
+  nodeEnv: 'production',
   
-  // CORS configuration
-  corsOrigin: process.env['CORS_ORIGIN'] || 'http://localhost:3000',
+  // CORS configuration - PRODUCTION DOMAIN
+  corsOrigin: 'https://ashram-queue-socket-server.onrender.com',
   
   // Socket.IO configuration
-  socketPath: process.env['SOCKET_PATH'] || '/socket.io',
+  socketPath: '/socket.io',
   
-  // Main application URL
-  appUrl: process.env['APP_URL'] || 'http://localhost:3000',
+  // Main application URL - PRODUCTION DOMAIN
+  appUrl: 'https://ashram-queue-socket-server.onrender.com',
   
   // Logging
-  logLevel: process.env['LOG_LEVEL'] || 'info',
+  logLevel: 'warn',
   
   // Socket.IO Admin configuration
-  adminAuth: process.env['ADMIN_AUTH'] === 'true',
-  adminMode: process.env['ADMIN_MODE'] || 'development',
-  adminUsername: process.env['ADMIN_USERNAME'],
-  adminPassword: process.env['ADMIN_PASSWORD']
+  adminAuth: true,
+  adminMode: 'production',
+  adminUsername: 'admin', // Change this to your secure username
+  adminPassword: 'secure_password_123' // Change this to your secure password
 };

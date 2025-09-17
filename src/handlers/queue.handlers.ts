@@ -179,10 +179,99 @@ export const broadcastQueueEntryRemoved = (io: Server, entry: QueueEntry) => {
 };
 
 /**
+ * Handle queue consultation start
+ */
+export const handleStartConsultation = (socket: Socket) => {
+  socket.on(QueueSocketEvents.START_CONSULTATION, (data: { entryId: string }) => {
+    try {
+      const { entryId } = data;
+      
+      if (!entryId) {
+        throw new Error('Entry ID is required');
+      }
+      
+      // This will be handled by the main app
+      // For now, just acknowledge the request
+      socket.emit(QueueSocketEvents.QUEUE_ENTRY_UPDATED, {
+        message: 'Consultation start request received',
+        entryId,
+        timestamp: Date.now()
+      });
+      
+      console.log(`Consultation start requested for entry: ${entryId}`);
+      
+    } catch (error) {
+      console.error('Error handling consultation start:', error);
+      socket.emit(QueueSocketEvents.ERROR, { 
+        message: 'Failed to start consultation', 
+        code: 'START_CONSULTATION_ERROR' 
+      });
+    }
+  });
+};
+
+/**
+ * Handle queue consultation completion
+ */
+export const handleCompleteConsultation = (socket: Socket) => {
+  socket.on(QueueSocketEvents.COMPLETE_CONSULTATION, (data: { entryId: string }) => {
+    try {
+      const { entryId } = data;
+      
+      if (!entryId) {
+        throw new Error('Entry ID is required');
+      }
+      
+      // This will be handled by the main app
+      // For now, just acknowledge the request
+      socket.emit(QueueSocketEvents.QUEUE_ENTRY_UPDATED, {
+        message: 'Consultation completion request received',
+        entryId,
+        timestamp: Date.now()
+      });
+      
+      console.log(`Consultation completion requested for entry: ${entryId}`);
+      
+    } catch (error) {
+      console.error('Error handling consultation completion:', error);
+      socket.emit(QueueSocketEvents.ERROR, { 
+        message: 'Failed to complete consultation', 
+        code: 'COMPLETE_CONSULTATION_ERROR' 
+      });
+    }
+  });
+};
+
+/**
+ * Handle short queue update request
+ */
+export const handleRequestQueueUpdateShort = (socket: Socket) => {
+  socket.on(QueueSocketEvents.REQUEST_QUEUE_UPDATE_SHORT, () => {
+    try {
+      // This will be triggered by the main app when queue data changes
+      // For now, just acknowledge the request
+      socket.emit(QueueSocketEvents.QUEUE_UPDATED, {
+        message: 'Queue update request received (short)',
+        timestamp: Date.now()
+      });
+    } catch (error) {
+      console.error('Error handling queue update request (short):', error);
+      socket.emit(QueueSocketEvents.ERROR, { 
+        message: 'Failed to get queue updates', 
+        code: 'QUEUE_UPDATE_ERROR' 
+      });
+    }
+  });
+};
+
+/**
  * Register all queue event handlers
  */
 export const registerQueueHandlers = (socket: Socket, _io: Server) => {
   handleRequestQueueUpdate(socket);
   handleRequestUserQueueStatus(socket);
   handleRequestGurujiQueue(socket);
+  handleStartConsultation(socket);
+  handleCompleteConsultation(socket);
+  handleRequestQueueUpdateShort(socket);
 };

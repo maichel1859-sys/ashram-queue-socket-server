@@ -125,15 +125,42 @@ export const handleJoinRoom = (socket: Socket) => {
         console.log(`Guruji ${gurujiId} joined their room`);
       } else if (role === 'ADMIN' || role === 'COORDINATOR') {
         socket.join('admin');
-        tracker.roomCount++;
-        totalRooms++;
-        console.log(`Admin/Coordinator joined admin room`);
+        socket.join('coordinator'); // Also join coordinator room
+        tracker.roomCount += 2;
+        totalRooms += 2;
+        console.log(`Admin/Coordinator joined admin and coordinator rooms`);
       }
       
       // Everyone joins the general queue room
       socket.join('queue');
       tracker.roomCount++;
       totalRooms++;
+      
+      // Join additional rooms based on role
+      if (role === 'USER') {
+        socket.join('appointments');
+        socket.join('consultations');
+        socket.join('remedies');
+        socket.join('notifications');
+        tracker.roomCount += 4;
+        totalRooms += 4;
+      } else if (role === 'GURUJI') {
+        socket.join('appointments');
+        socket.join('consultations');
+        socket.join('remedies');
+        tracker.roomCount += 3;
+        totalRooms += 3;
+      } else if (role === 'ADMIN' || role === 'COORDINATOR') {
+        socket.join('appointments');
+        socket.join('consultations');
+        socket.join('remedies');
+        socket.join('notifications');
+        socket.join('payments');
+        socket.join('emergencies');
+        socket.join('system');
+        tracker.roomCount += 7;
+        totalRooms += 7;
+      }
       
       socket.emit(QueueSocketEvents.JOIN_ROOM, { 
         success: true,
@@ -182,19 +209,34 @@ export const handleLeaveRoom = (socket: Socket) => {
       // Leave appropriate rooms based on role
       if (role === 'USER' && userId) {
         socket.leave(`user:${userId}`);
-        if (tracker) tracker.roomCount--;
-        totalRooms--;
-        console.log(`User ${userId} left their room`);
+        socket.leave('appointments');
+        socket.leave('consultations');
+        socket.leave('remedies');
+        socket.leave('notifications');
+        if (tracker) tracker.roomCount -= 5;
+        totalRooms -= 5;
+        console.log(`User ${userId} left their rooms`);
       } else if (role === 'GURUJI' && gurujiId) {
         socket.leave(`guruji:${gurujiId}`);
-        if (tracker) tracker.roomCount--;
-        totalRooms--;
-        console.log(`Guruji ${gurujiId} left their room`);
+        socket.leave('appointments');
+        socket.leave('consultations');
+        socket.leave('remedies');
+        if (tracker) tracker.roomCount -= 4;
+        totalRooms -= 4;
+        console.log(`Guruji ${gurujiId} left their rooms`);
       } else if (role === 'ADMIN' || role === 'COORDINATOR') {
         socket.leave('admin');
-        if (tracker) tracker.roomCount--;
-        totalRooms--;
-        console.log(`Admin/Coordinator left admin room`);
+        socket.leave('coordinator');
+        socket.leave('appointments');
+        socket.leave('consultations');
+        socket.leave('remedies');
+        socket.leave('notifications');
+        socket.leave('payments');
+        socket.leave('emergencies');
+        socket.leave('system');
+        if (tracker) tracker.roomCount -= 9;
+        totalRooms -= 9;
+        console.log(`Admin/Coordinator left their rooms`);
       }
       
       // Leave the general queue room

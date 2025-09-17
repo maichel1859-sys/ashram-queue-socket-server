@@ -368,6 +368,100 @@ export const broadcastSystemUpdate = (io: Server, event: SystemEvent) => {
 };
 
 /**
+ * Broadcast check-in updates
+ */
+export const broadcastCheckInUpdate = (io: Server, data: any) => {
+  // Broadcast to queue room
+  io.to(RoomTypes.QUEUE).emit(RealTimeEvents.CHECKIN_UPDATE, data);
+  
+  // Broadcast to specific user
+  if (data.user?.id) {
+    io.to(`${RoomTypes.USER}:${data.user.id}`).emit(RealTimeEvents.CHECKIN_UPDATE, data);
+  }
+  
+  // Broadcast to guruji
+  if (data.guruji?.id) {
+    io.to(`${RoomTypes.GURUJI}:${data.guruji.id}`).emit(RealTimeEvents.CHECKIN_UPDATE, data);
+  }
+  
+  // Broadcast to admin/coordinator rooms
+  io.to(RoomTypes.ADMIN).emit(RealTimeEvents.CHECKIN_UPDATE, data);
+  io.to(RoomTypes.COORDINATOR).emit(RealTimeEvents.CHECKIN_UPDATE, data);
+  
+  // Broadcast to notifications room
+  io.to(RoomTypes.NOTIFICATIONS).emit(RealTimeEvents.CHECKIN_UPDATE, data);
+  
+  console.log(`Broadcasted check-in update: ${data.action} for user ${data.user?.id}`);
+};
+
+/**
+ * Broadcast appointment booking
+ */
+export const broadcastAppointmentBooking = (io: Server, data: any) => {
+  // Broadcast to appointments room
+  io.to(RoomTypes.APPOINTMENTS).emit(RealTimeEvents.APPOINTMENT_BOOKING, data);
+  
+  // Broadcast to specific user
+  if (data.userId) {
+    io.to(`${RoomTypes.USER}:${data.userId}`).emit(RealTimeEvents.APPOINTMENT_BOOKING, data);
+  }
+  
+  // Broadcast to guruji
+  if (data.gurujiId) {
+    io.to(`${RoomTypes.GURUJI}:${data.gurujiId}`).emit(RealTimeEvents.APPOINTMENT_BOOKING, data);
+  }
+  
+  // Broadcast to admin/coordinator rooms
+  io.to(RoomTypes.ADMIN).emit(RealTimeEvents.APPOINTMENT_BOOKING, data);
+  io.to(RoomTypes.COORDINATOR).emit(RealTimeEvents.APPOINTMENT_BOOKING, data);
+  
+  console.log(`Broadcasted appointment booking for user ${data.userId} with guruji ${data.gurujiId}`);
+};
+
+/**
+ * Broadcast appointment cancellation
+ */
+export const broadcastAppointmentCancellation = (io: Server, data: any) => {
+  // Broadcast to appointments room
+  io.to(RoomTypes.APPOINTMENTS).emit(RealTimeEvents.APPOINTMENT_CANCELLATION, data);
+  
+  // Broadcast to specific user
+  if (data.userId) {
+    io.to(`${RoomTypes.USER}:${data.userId}`).emit(RealTimeEvents.APPOINTMENT_CANCELLATION, data);
+  }
+  
+  // Broadcast to guruji
+  if (data.gurujiId) {
+    io.to(`${RoomTypes.GURUJI}:${data.gurujiId}`).emit(RealTimeEvents.APPOINTMENT_CANCELLATION, data);
+  }
+  
+  // Broadcast to admin/coordinator rooms
+  io.to(RoomTypes.ADMIN).emit(RealTimeEvents.APPOINTMENT_CANCELLATION, data);
+  io.to(RoomTypes.COORDINATOR).emit(RealTimeEvents.APPOINTMENT_CANCELLATION, data);
+  
+  console.log(`Broadcasted appointment cancellation for user ${data.userId} with guruji ${data.gurujiId}`);
+};
+
+/**
+ * Broadcast appointment created for user
+ */
+export const broadcastAppointmentCreatedForUser = (io: Server, data: any) => {
+  // Broadcast to specific user
+  if (data.userId) {
+    io.to(`${RoomTypes.USER}:${data.userId}`).emit(RealTimeEvents.APPOINTMENT_CREATED_FOR_USER, data);
+  }
+  
+  // Broadcast to appointments room
+  io.to(RoomTypes.APPOINTMENTS).emit(RealTimeEvents.APPOINTMENT_CREATED_FOR_USER, data);
+  
+  // Broadcast to admin/coordinator rooms
+  io.to(RoomTypes.ADMIN).emit(RealTimeEvents.APPOINTMENT_CREATED_FOR_USER, data);
+  io.to(RoomTypes.COORDINATOR).emit(RealTimeEvents.APPOINTMENT_CREATED_FOR_USER, data);
+  
+  console.log(`Broadcasted appointment created for user ${data.userId}`);
+};
+
+/**
  * Generic event broadcaster
  */
 export const broadcastEvent = (io: Server, event: RealTimeEvent) => {

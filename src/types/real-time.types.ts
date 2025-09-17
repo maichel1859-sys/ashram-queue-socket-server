@@ -197,6 +197,12 @@ export enum RealTimeEvents {
   EMERGENCY_UPDATE = 'emergency_update',
   SYSTEM_UPDATE = 'system_update',
   
+  // Additional events used by frontend
+  CHECKIN_UPDATE = 'checkin_update',
+  APPOINTMENT_BOOKING = 'appointment_booking',
+  APPOINTMENT_CANCELLATION = 'appointment_cancellation',
+  APPOINTMENT_CREATED_FOR_USER = 'appointment_created_for_user',
+  
   // Error events
   ERROR = 'error',
   RATE_LIMIT_EXCEEDED = 'rate_limit_exceeded',

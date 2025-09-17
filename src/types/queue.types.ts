@@ -53,6 +53,11 @@ export enum QueueSocketEvents {
   REQUEST_USER_QUEUE_STATUS = 'request_user_queue_status',
   REQUEST_GURUJI_QUEUE = 'request_guruji_queue',
   
+  // Queue management events (used by frontend)
+  START_CONSULTATION = 'queue:start_consultation',
+  COMPLETE_CONSULTATION = 'queue:complete_consultation',
+  REQUEST_QUEUE_UPDATE_SHORT = 'request:queue_update',
+  
   // Server -> Client events
   QUEUE_UPDATED = 'queue_updated',
   USER_QUEUE_STATUS = 'user_queue_status',
@@ -61,6 +66,13 @@ export enum QueueSocketEvents {
   QUEUE_ENTRY_ADDED = 'queue_entry_added',
   QUEUE_ENTRY_REMOVED = 'queue_entry_removed',
   QUEUE_POSITION_UPDATED = 'queue_position_updated',
+  
+  // Additional events used by frontend
+  CHECKIN_UPDATE = 'checkin_update',
+  APPOINTMENT_BOOKING = 'appointment_booking',
+  APPOINTMENT_CANCELLATION = 'appointment_cancellation',
+  APPOINTMENT_CREATED_FOR_USER = 'appointment_created_for_user',
+  
   ERROR = 'error'
 }
 

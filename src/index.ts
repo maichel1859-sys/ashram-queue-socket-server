@@ -12,6 +12,7 @@ import cors from 'cors';
 import { config } from './config/env';
 import { registerConnectionHandlers } from './middleware/connection.middleware';
 import { registerQueueHandlers } from './handlers/queue.handlers';
+import { registerRealTimeHandlers } from './handlers/real-time.handlers';
 
 // Create Express app
 const app = express();
@@ -22,6 +23,9 @@ app.use(cors({
   methods: ['GET', 'POST'],
   credentials: true
 }));
+
+// Add JSON parsing middleware
+app.use(express.json());
 
 // Create HTTP server
 const server = http.createServer(app);
@@ -65,6 +69,89 @@ app.get('/health', (_req: Request, res: Response) => {
   });
 });
 
+// Broadcast API endpoint for external applications
+app.post('/api/broadcast', (req: Request, res: Response): void => {
+  try {
+    const { event, data, rooms } = req.body;
+    
+    if (!event || !data || !rooms) {
+      res.status(400).json({ 
+        error: 'Missing required fields: event, data, rooms' 
+      });
+      return;
+    }
+    
+    // Handle specific event types with custom broadcasting logic
+    switch (event) {
+      case 'checkin_update':
+        // Import the broadcast function dynamically to avoid circular imports
+        const { broadcastCheckInUpdate } = require('./handlers/real-time.handlers');
+        broadcastCheckInUpdate(io, data);
+        break;
+        
+      case 'appointment_booking':
+        const { broadcastAppointmentBooking } = require('./handlers/real-time.handlers');
+        broadcastAppointmentBooking(io, data);
+        break;
+        
+      case 'appointment_cancellation':
+        const { broadcastAppointmentCancellation } = require('./handlers/real-time.handlers');
+        broadcastAppointmentCancellation(io, data);
+        break;
+        
+      case 'appointment_created_for_user':
+        const { broadcastAppointmentCreatedForUser } = require('./handlers/real-time.handlers');
+        broadcastAppointmentCreatedForUser(io, data);
+        break;
+        
+      case 'queue_updated':
+      case 'queue_entry_added':
+      case 'queue_entry_updated':
+      case 'queue_entry_removed':
+      case 'queue_position_updated':
+        const { broadcastQueueEntryUpdate, broadcastQueueEntryAdded, broadcastQueueEntryRemoved, broadcastQueuePositionUpdate } = require('./handlers/queue.handlers');
+        
+        if (event === 'queue_entry_added') {
+          broadcastQueueEntryAdded(io, data);
+        } else if (event === 'queue_entry_removed') {
+          broadcastQueueEntryRemoved(io, data);
+        } else if (event === 'queue_position_updated') {
+          broadcastQueuePositionUpdate(io, data.gurujiId, data.entries);
+        } else {
+          broadcastQueueEntryUpdate(io, data);
+        }
+        break;
+        
+      default:
+        // Generic broadcast to specified rooms
+        rooms.forEach((room: string) => {
+          io.to(room).emit(event, {
+            ...data,
+            timestamp: new Date().toISOString(),
+            broadcastedAt: Date.now()
+          });
+        });
+        break;
+    }
+    
+    console.log(`🔌 Broadcasted event '${event}' to ${rooms.length} rooms:`, rooms);
+    
+    res.status(200).json({ 
+      success: true, 
+      message: `Event '${event}' broadcasted to ${rooms.length} rooms`,
+      rooms,
+      timestamp: new Date().toISOString()
+    });
+    
+  } catch (error) {
+    console.error('Broadcast API error:', error);
+    res.status(500).json({ 
+      error: 'Failed to broadcast event',
+      message: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+});
+
 // Socket.IO connection handler
 io.on('connection', (socket) => {
   try {
@@ -73,6 +160,9 @@ io.on('connection', (socket) => {
     
     // Register queue handlers
     registerQueueHandlers(socket, io);
+    
+    // Register real-time handlers
+    registerRealTimeHandlers(socket);
     
     console.log(`Client connected: ${socket.id}, Total connections: ${io.engine.clientsCount}`);
   } catch (error) {
