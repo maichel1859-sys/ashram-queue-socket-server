@@ -4,23 +4,23 @@
  */
 
 export const config = {
-  // Server configuration
-  port: 7077,
+  // Server configuration - Use PORT environment variable for deployment
+  port: process.env['PORT'] ? parseInt(process.env['PORT']) : 7077,
   host: '0.0.0.0',
-  nodeEnv: 'production',
-  
+  nodeEnv: process.env['NODE_ENV'] || 'production',
+
   // CORS configuration - PRODUCTION DOMAIN
   corsOrigin: 'https://ashram-queue-socket-server.onrender.com',
-  
+
   // Socket.IO configuration
   socketPath: '/socket.io',
-  
+
   // Main application URL - PRODUCTION DOMAIN
   appUrl: 'https://ashram-queue-socket-server.onrender.com',
-  
+
   // Logging
   logLevel: 'warn',
-  
+
   // Socket.IO Admin configuration
   adminAuth: true,
   adminMode: 'production',
