@@ -155,6 +155,64 @@ export interface SystemEvent extends BaseEvent {
   };
 }
 
+// Presence events
+export interface PresenceEvent extends BaseEvent {
+  type: 'USER_STATUS_CHANGED' | 'TYPING_START' | 'TYPING_END';
+  data: {
+    id: string;
+    status: 'online' | 'offline' | 'away' | 'busy';
+    lastSeen: number;
+    typingIn?: string;
+  };
+}
+
+// Counter events
+export interface CounterEvent extends BaseEvent {
+  type: 'COUNTERS_UPDATE';
+  data: {
+    activeUsers: number;
+    totalAppointmentsToday: number;
+    pendingAppointments: number;
+    completedAppointmentsToday: number;
+    currentQueueLength: number;
+    gurujiAvailable: number;
+    newNotifications: number;
+  };
+}
+
+// Progress events
+export interface ProgressEvent extends BaseEvent {
+  type: 'PROGRESS_UPDATE' | 'PROGRESS_CANCELLED';
+  data: {
+    id: string;
+    type: 'upload' | 'processing' | 'bulk_operation' | 'export' | 'import' | 'backup' | 'custom';
+    status: 'pending' | 'running' | 'completed' | 'failed' | 'cancelled';
+    progress: number;
+    message: string;
+    startTime: number;
+    endTime?: number;
+    estimatedTimeRemaining?: number;
+    error?: string;
+  };
+}
+
+// Tab sync events
+export interface TabSyncEvent extends BaseEvent {
+  type: 'TAB_JOINED' | 'TAB_LEFT' | 'TAB_FOCUS_CHANGED' | 'TAB_SYNC';
+  data: {
+    tabId: string;
+    activeTabId?: string;
+    totalTabs?: number;
+    syncEvent?: {
+      id: string;
+      type: 'appointment' | 'queue' | 'notification' | 'user' | 'guruji' | 'system' | 'custom';
+      action: 'create' | 'update' | 'delete' | 'status_change' | 'custom';
+      data: any;
+      timestamp: number;
+    };
+  };
+}
+
 // Union type for all events
 export type RealTimeEvent = 
   | AppointmentEvent 
@@ -167,7 +225,11 @@ export type RealTimeEvent =
   | ClinicEvent 
   | PaymentEvent 
   | EmergencyEvent 
-  | SystemEvent;
+  | SystemEvent
+  | PresenceEvent
+  | CounterEvent
+  | ProgressEvent
+  | TabSyncEvent;
 
 // Socket.IO event names
 export enum RealTimeEvents {
@@ -202,6 +264,43 @@ export enum RealTimeEvents {
   APPOINTMENT_BOOKING = 'appointment_booking',
   APPOINTMENT_CANCELLATION = 'appointment_cancellation',
   APPOINTMENT_CREATED_FOR_USER = 'appointment_created_for_user',
+  
+  // Presence events
+  USER_STATUS_CHANGED = 'user_status_changed',
+  TYPING_START = 'typing_start',
+  TYPING_END = 'typing_end',
+  TYPING_STOP = 'typing_stop',
+  USER_ACTIVITY = 'user_activity',
+  HEARTBEAT = 'heartbeat',
+  HEARTBEAT_PONG = 'heartbeat_pong',
+  ONLINE_COUNTS = 'online_counts',
+  REQUEST_PRESENCE = 'request_presence',
+  PRESENCE_UPDATE = 'presence_update',
+  
+  // Counter events
+  COUNTERS_UPDATE = 'counters_update',
+  REQUEST_COUNTERS = 'request_counters',
+  COUNTERS_RESPONSE = 'counters_response',
+  
+  // Progress events
+  PROGRESS_UPDATE = 'progress_update',
+  REQUEST_PROGRESS = 'request_progress',
+  PROGRESS_RESPONSE = 'progress_response',
+  CANCEL_PROGRESS = 'cancel_progress',
+  PROGRESS_CANCELLED = 'progress_cancelled',
+  
+  // Tab sync events
+  REGISTER_TAB = 'register_tab',
+  UNREGISTER_TAB = 'unregister_tab',
+  TAB_ACTIVITY = 'tab_activity',
+  TAB_FOCUS = 'tab_focus',
+  TAB_BLUR = 'tab_blur',
+  TAB_JOINED = 'tab_joined',
+  TAB_LEFT = 'tab_left',
+  TAB_FOCUS_CHANGED = 'tab_focus_changed',
+  TAB_SYNC = 'tab_sync',
+  REQUEST_SYNC_EVENTS = 'request_sync_events',
+  SYNC_EVENTS_RESPONSE = 'sync_events_response',
   
   // Error events
   ERROR = 'error',

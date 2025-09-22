@@ -117,18 +117,24 @@ export const handleJoinRoom = (socket: Socket) => {
         socket.join(`user:${userId}`);
         tracker.roomCount++;
         totalRooms++;
-        console.log(`User ${userId} joined their room`);
+        console.log(`🔵 USER DASHBOARD CONNECTED: ${userId} | Socket: ${socket.id} | Rooms: user:${userId}`);
       } else if (role === 'GURUJI' && gurujiId) {
         socket.join(`guruji:${gurujiId}`);
         tracker.roomCount++;
         totalRooms++;
-        console.log(`Guruji ${gurujiId} joined their room`);
-      } else if (role === 'ADMIN' || role === 'COORDINATOR') {
+        console.log(`🟢 GURUJI DASHBOARD CONNECTED: ${gurujiId} | Socket: ${socket.id} | Rooms: guruji:${gurujiId}`);
+      } else if (role === 'ADMIN') {
         socket.join('admin');
         socket.join('coordinator'); // Also join coordinator room
         tracker.roomCount += 2;
         totalRooms += 2;
-        console.log(`Admin/Coordinator joined admin and coordinator rooms`);
+        console.log(`🔴 ADMIN DASHBOARD CONNECTED | Socket: ${socket.id} | Rooms: admin, coordinator`);
+      } else if (role === 'COORDINATOR') {
+        socket.join('admin');
+        socket.join('coordinator'); // Also join coordinator room
+        tracker.roomCount += 2;
+        totalRooms += 2;
+        console.log(`🟡 COORDINATOR DASHBOARD CONNECTED | Socket: ${socket.id} | Rooms: admin, coordinator`);
       }
       
       // Everyone joins the general queue room
