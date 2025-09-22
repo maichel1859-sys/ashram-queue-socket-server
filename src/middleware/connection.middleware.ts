@@ -150,12 +150,14 @@ export const handleJoinRoom = (socket: Socket) => {
         socket.join('notifications');
         tracker.roomCount += 4;
         totalRooms += 4;
+        console.log(`   📋 USER Additional Rooms: queue, appointments, consultations, remedies, notifications`);
       } else if (role === 'GURUJI') {
         socket.join('appointments');
         socket.join('consultations');
         socket.join('remedies');
         tracker.roomCount += 3;
         totalRooms += 3;
+        console.log(`   📋 GURUJI Additional Rooms: queue, appointments, consultations, remedies`);
       } else if (role === 'ADMIN' || role === 'COORDINATOR') {
         socket.join('appointments');
         socket.join('consultations');
@@ -166,6 +168,7 @@ export const handleJoinRoom = (socket: Socket) => {
         socket.join('system');
         tracker.roomCount += 7;
         totalRooms += 7;
+        console.log(`   📋 ${role} Additional Rooms: queue, appointments, consultations, remedies, notifications, payments, emergencies, system`);
       }
       
       socket.emit(QueueSocketEvents.JOIN_ROOM, { 
@@ -174,8 +177,8 @@ export const handleJoinRoom = (socket: Socket) => {
       });
       
       // Log connection stats
-      if (totalConnections % 100 === 0) {
-        console.log(`Connection stats: ${totalConnections} connections, ${totalRooms} rooms`);
+      if (totalConnections % 10 === 0) {
+        console.log(`📊 CONNECTION MILESTONE: ${totalConnections} active connections, ${totalRooms} total rooms`);
       }
       
     } catch (error) {
@@ -221,7 +224,7 @@ export const handleLeaveRoom = (socket: Socket) => {
         socket.leave('notifications');
         if (tracker) tracker.roomCount -= 5;
         totalRooms -= 5;
-        console.log(`User ${userId} left their rooms`);
+        console.log(`🔵 USER DASHBOARD DISCONNECTED: ${userId} | Socket: ${socket.id}`);
       } else if (role === 'GURUJI' && gurujiId) {
         socket.leave(`guruji:${gurujiId}`);
         socket.leave('appointments');
@@ -229,8 +232,8 @@ export const handleLeaveRoom = (socket: Socket) => {
         socket.leave('remedies');
         if (tracker) tracker.roomCount -= 4;
         totalRooms -= 4;
-        console.log(`Guruji ${gurujiId} left their rooms`);
-      } else if (role === 'ADMIN' || role === 'COORDINATOR') {
+        console.log(`🟢 GURUJI DASHBOARD DISCONNECTED: ${gurujiId} | Socket: ${socket.id}`);
+      } else if (role === 'ADMIN') {
         socket.leave('admin');
         socket.leave('coordinator');
         socket.leave('appointments');
@@ -242,7 +245,20 @@ export const handleLeaveRoom = (socket: Socket) => {
         socket.leave('system');
         if (tracker) tracker.roomCount -= 9;
         totalRooms -= 9;
-        console.log(`Admin/Coordinator left their rooms`);
+        console.log(`🔴 ADMIN DASHBOARD DISCONNECTED | Socket: ${socket.id}`);
+      } else if (role === 'COORDINATOR') {
+        socket.leave('admin');
+        socket.leave('coordinator');
+        socket.leave('appointments');
+        socket.leave('consultations');
+        socket.leave('remedies');
+        socket.leave('notifications');
+        socket.leave('payments');
+        socket.leave('emergencies');
+        socket.leave('system');
+        if (tracker) tracker.roomCount -= 9;
+        totalRooms -= 9;
+        console.log(`🟡 COORDINATOR DASHBOARD DISCONNECTED | Socket: ${socket.id}`);
       }
       
       // Leave the general queue room
@@ -270,8 +286,8 @@ export const handleLeaveRoom = (socket: Socket) => {
  */
 export const handleDisconnect = (socket: Socket) => {
   socket.on('disconnect', (reason) => {
-    console.log(`Client disconnected: ${socket.id}, reason: ${reason}`);
-    
+    console.log(`🔌 SOCKET DISCONNECTED: ${socket.id} | Reason: ${reason}`);
+
     // Clean up tracking data
     const tracker = connectionTracker.get(socket.id);
     if (tracker) {
@@ -279,11 +295,11 @@ export const handleDisconnect = (socket: Socket) => {
       totalConnections--;
       connectionTracker.delete(socket.id);
     }
-    
+
     // Clean up rate limit data
     rateLimitMap.delete(socket.id);
-    
-    console.log(`Connection stats after disconnect: ${totalConnections} connections, ${totalRooms} rooms`);
+
+    console.log(`📊 Current Stats: ${totalConnections} active connections, ${totalRooms} total rooms`);
   });
 };
 
@@ -291,8 +307,9 @@ export const handleDisconnect = (socket: Socket) => {
  * Register all connection middleware
  */
 export const registerConnectionHandlers = (socket: Socket) => {
-  console.log(`Client connected: ${socket.id}, Total connections: ${totalConnections + 1}`);
-  
+  console.log(`🔌 NEW SOCKET CONNECTION: ${socket.id} | Total connections: ${totalConnections + 1}`);
+  console.log(`   ⏳ Waiting for role identification...`);
+
   handleJoinRoom(socket);
   handleLeaveRoom(socket);
   handleDisconnect(socket);

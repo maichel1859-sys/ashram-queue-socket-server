@@ -1,0 +1,30 @@
+services:
+  - type: web
+    name: ashram-queue-socket-server
+    env: node
+    plan: free
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: HOST
+        value: 0.0.0.0
+      - key: CORS_ORIGIN
+        value: https://ashram-queue-socket-server.onrender.com
+      - key: APP_URL
+        value: https://ashram-queue-socket-server.onrender.com
+      - key: SOCKET_PATH
+        value: /socket.io
+      - key: LOG_LEVEL
+        value: warn
+      - key: ADMIN_AUTH
+        value: true
+      - key: ADMIN_MODE
+        value: production
+      - key: ADMIN_USERNAME
+        value: admin
+      - key: ADMIN_PASSWORD
+        value: secure_password_123

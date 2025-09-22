@@ -42,7 +42,8 @@ const io = new Server(server, {
     methods: ['GET', 'POST'],
     credentials: true
   },
-  transports: ['websocket', 'polling']
+  transports: ['websocket', 'polling'],
+  allowEIO3: true
 });
 
 // Add Socket.IO Admin UI for monitoring with authentication
@@ -58,7 +59,8 @@ if (config.adminAuth && (!config.adminUsername || !config.adminPassword)) {
     } : false, 
     mode: config.adminMode as "development" | "production", 
     serverId: `ashram-queue-${config.nodeEnv}-${config.port}`, 
-    readonly: false
+    readonly: false,
+    namespaceName: "/admin"
   });
 }
 
@@ -69,7 +71,20 @@ app.get('/health', (_req: Request, res: Response) => {
     timestamp: new Date().toISOString(),
     socketConnections: io.engine.clientsCount,
     environment: config.nodeEnv,
-    adminUrl: "https://admin.socket.io"
+    adminUrl: "https://admin.socket.io",
+    serverUrl: config.appUrl,
+    corsOrigin: config.corsOrigin
+  });
+});
+
+// Admin UI info endpoint
+app.get('/admin-info', (_req: Request, res: Response) => {
+  res.status(200).json({
+    adminEnabled: !config.adminAuth || (config.adminUsername && config.adminPassword),
+    adminMode: config.adminMode,
+    serverId: `ashram-queue-${config.nodeEnv}-${config.port}`,
+    adminUrl: "https://admin.socket.io",
+    serverUrl: config.appUrl
   });
 });
 
